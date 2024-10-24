@@ -94,6 +94,7 @@ export default function IntegratedAdminDashboard() {
     setQuestions([...questions, { id: Date.now(), ...newQuestion }])
   }
 
+  
   const handleEditQuestion = (id, updatedQuestion) => {
     setQuestions(questions.map(question => question.id === id ? { ...question, ...updatedQuestion } : question))
   }
@@ -640,9 +641,8 @@ export default function IntegratedAdminDashboard() {
 
 export function AdminDashboardWrapper() {
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
+   
       <IntegratedAdminDashboard />
-    </div>
+    
   )
 }
