@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Grid, BookOpen, CreditCard, Upload, Palette, Globe, DollarSign, Plus, Edit, Trash2, Search, Bell, Settings, LogOut, Eye, FileUp, X } from 'lucide-react'
+import { Grid, BookOpen, CreditCard, Upload, Plus, Edit, Trash2, Search, Bell, Settings, LogOut, Eye, FileUp, X } from 'lucide-react'
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('courses')
@@ -31,7 +31,7 @@ export default function AdminPage() {
   const [pdfPreview, setPdfPreview] = useState<string | null>(null)
   const [paymentApiKey, setPaymentApiKey] = useState('')
 
-  const handleAdd = (type) => {
+  const handleAdd = () => {
     setEditItem(null)
     setIsDialogOpen(true)
   }

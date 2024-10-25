@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChevronLeft } from 'lucide-react'
-import Image from 'next/image'
 import { motion } from "framer-motion"
 import Link from 'next/link'
 
@@ -20,7 +19,6 @@ interface Question {
 interface FrancophoneSectionProps {
   examType: 'BEPC' | 'Probatoire' | 'BACC'
   classes: Class[]
-  onSelectQuestion: (question: Question) => void
   onBack: () => void
 }
 
@@ -40,7 +38,7 @@ const mockQuestions: Record<string, Question[]> = {
   // Add more mock questions for other classes
 }
 
-export default function FrancophoneSection({ examType, classes, onSelectQuestion, onBack }: FrancophoneSectionProps) {
+export default function FrancophoneSection({ examType, classes, onBack }: FrancophoneSectionProps) {
   const [selectedClass, setSelectedClass] = useState<Class | null>(null)
 
   const handleClassSelect = (classItem: Class) => {
