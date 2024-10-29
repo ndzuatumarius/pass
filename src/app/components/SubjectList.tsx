@@ -4,8 +4,6 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 import { motion } from "framer-motion"
-import ViewQuestion from './ViewQuestion'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import Link from 'next/link'
 
 interface Subject {
@@ -16,6 +14,7 @@ interface Subject {
 interface Question {
   id: number
   title: string
+  section: string
   level: string
   pdfUrl: string
   solutionUrl: string
@@ -37,6 +36,7 @@ const subjectQuestions: Record<string, Question[]> = {
     { 
       id: 1, 
       title: "Accounting Principles and Financial Statements", 
+      section: "Accounting",
       level: "Advanced",
       pdfUrl: "/sample-pdf-accounting-1.pdf",
       solutionUrl: "/sample-solution-accounting-1.pdf",
@@ -47,6 +47,7 @@ const subjectQuestions: Record<string, Question[]> = {
     { 
       id: 2, 
       title: "Cost Accounting and Budgeting", 
+      section: "Accounting",
       level: "Advanced",
       pdfUrl: "/sample-pdf-accounting-2.pdf",
       solutionUrl: "/sample-solution-accounting-2.pdf",
@@ -59,6 +60,7 @@ const subjectQuestions: Record<string, Question[]> = {
     { 
       id: 3, 
       title: "Cell Biology and Genetics", 
+      section: "Biology",
       level: "Advanced",
       pdfUrl: "/sample-pdf-biology-1.pdf",
       solutionUrl: "/sample-solution-biology-1.pdf",
@@ -69,6 +71,7 @@ const subjectQuestions: Record<string, Question[]> = {
     { 
       id: 4, 
       title: "Ecology and Environmental Biology", 
+      section: "Biology",
       level: "Advanced",
       pdfUrl: "/sample-pdf-biology-2.pdf",
       solutionUrl: "/sample-solution-biology-2.pdf",

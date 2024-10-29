@@ -8,22 +8,22 @@ import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 
 const universities = [
-  { id: 1, name: "Université de Buéa", location: "Buéa", image: "/ub.jpg" },
-  { id: 2, name: "Université de Dschang", location: "Dschang", image: "/uds.jpg" },
-  { id: 3, name: "Institut Catholique de Yaoundé", location: "Yaoundé", image: "/icy.jpg" },
-  { id: 4, name: "Université de Douala", location: "Douala", image: "/ud.jpg" },
-  { id: 5, name: "Université de Ngaoundéré", location: "Ngaoundéré", image: "/un.jpg" },
-  { id: 6, name: "Université de Yaoundé II", location: "Soa", image: "/uy2.jpg" },
-  { id: 7, name: "Université de Yaoundé I", location: "Yaoundé", image: "/uy1.jpg" },
-  { id: 8, name: "Université de Maroua", location: "Maroua", image: "/um.jpg" },
-  { id: 9, name: "Université de Bamenda", location: "Bamenda", image: "/uba.jpg" },
-  { id: 10, name: "Université des Montagnes", location: "Bangangté", image: "/udm.jpg" },
-  { id: 11, name: "Université Protestante d'Afrique Centrale", location: "Yaoundé", image: "/upac.jpg" },
-  { id: 12, name: "Catholic University of Cameroon", location: "Bamenda", image: "/catuc.jpg" },
-  { id: 13, name: "Université Adventiste Cosendai", location: "Nanga-Eboko", image: "/uac.jpg" },
-  { id: 14, name: "Bamenda University of Science and Technology", location: "Bamenda", image: "/bust.jpg" },
-  { id: 15, name: "Jagora University", location: "Yaoundé", image: "/ju.jpg" },
-  { id: 16, name: "International University, Bamenda", location: "Bamenda", image: "/iub.jpg" },
+  { id: 1, name: "Université de Buéa", location: "Buéa", image: "/placeholder.jpg" },
+  { id: 2, name: "Université de Dschang", location: "Dschang", image: "/placeholder.jpg" },
+  { id: 3, name: "Institut Catholique de Yaoundé", location: "Yaoundé", image: "/placeholder.jpg" },
+  { id: 4, name: "Université de Douala", location: "Douala", image: "/placeholder.jpg" },
+  { id: 5, name: "Université de Ngaoundéré", location: "Ngaoundéré", image: "/placeholder.jpg" },
+  { id: 6, name: "Université de Yaoundé II", location: "Soa", image: "/placeholder.jpg" },
+  { id: 7, name: "Université de Yaoundé I", location: "Yaoundé", image: "/placeholder.jpg" },
+  { id: 8, name: "Université de Maroua", location: "Maroua", image: "/placeholder.jpg" },
+  { id: 9, name: "Université de Bamenda", location: "Bamenda", image: "/placeholder.jpg" },
+  { id: 10, name: "Université des Montagnes", location: "Bangangté", image: "/placeholder.jpg" },
+  { id: 11, name: "Université Protestante d'Afrique Centrale", location: "Yaoundé", image: "/placeholder.jpg" },
+  { id: 12, name: "Catholic University of Cameroon", location: "Bamenda", image: "/placeholder.jpg" },
+  { id: 13, name: "Université Adventiste Cosendai", location: "Nanga-Eboko", image: "/placeholder.jpg" },
+  { id: 14, name: "Bamenda University of Science and Technology", location: "Bamenda", image: "/placeholder.jpg" },
+  { id: 15, name: "Jagora University", location: "Yaoundé", image: "/placeholder.jpg" },
+  { id: 16, name: "International University, Bamenda", location: "Bamenda", image: "/placeholder.jpg" },
 ]
 
 const concours = [
@@ -32,7 +32,6 @@ const concours = [
   { id: 3, name: "ENSP Concours", location: "Yaoundé" },
   { id: 4, name: "IRIC Concours", location: "Yaoundé" },
   { id: 5, name: "FMSP Concours", location: "Douala" },
-  // Add more concours as needed
 ]
 
 const universityQuestions = {
@@ -46,7 +45,6 @@ const universityQuestions = {
     { id: 202, title: "Computer Science Entrance Exam 2023", level: "Undergraduate" },
     { id: 203, title: "Economics Entrance Exam 2023", level: "Undergraduate" },
   ],
-  // Add more questions for other universities
 }
 
 const concoursQuestions = {
@@ -60,12 +58,19 @@ const concoursQuestions = {
     { id: 402, title: "ENS Literature Teaching Exam 2023", level: "Graduate" },
     { id: 403, title: "ENS Science Teaching Exam 2023", level: "Graduate" },
   ],
-  // Add more questions for other concours
 }
 
 interface UniversitySectionProps {
   examType: 'Universities' | 'Entrance Exams';
-  onSelectQuestion: (question: any) => void;
+  onSelectQuestion: (question: {
+    id: number;
+    title: string;
+    level: string;
+    pdfUrl?: string;
+    solutionUrl?: string;
+    supplementaryMaterialUrl?: string;
+    price?: number;
+  }) => void;
   onBack: () => void;
 }
 
@@ -89,11 +94,11 @@ export default function UniversitySection({ examType, onSelectQuestion, onBack }
           <Card className="flex flex-col h-full">
             <div className="relative pt-[56.25%] rounded-t-lg overflow-hidden">
               <Image
-                src={institution.image || "/placeholder.jpg"}
+                src="/placeholder.jpg"
                 alt={institution.name}
-                layout="fill"
-                objectFit="cover"
-                className="transition-transform duration-300 hover:scale-105"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transition-transform duration-300 hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-50" />
               <div className="absolute bottom-2 left-2 right-2 text-white">
@@ -101,9 +106,7 @@ export default function UniversitySection({ examType, onSelectQuestion, onBack }
                 <p className="text-xs">{institution.location}</p>
               </div>
             </div>
-            <CardContent className="flex-grow">
-              {/* You can add more content here if needed */}
-            </CardContent>
+            <CardContent className="flex-grow" />
             <CardFooter>
               <Button className="w-full" onClick={() => handleInstitutionSelect(institution.id)}>
                 View Questions
@@ -141,9 +144,7 @@ export default function UniversitySection({ examType, onSelectQuestion, onBack }
             <CardHeader>
               <CardTitle className="text-lg">{question.title}</CardTitle>
             </CardHeader>
-            <CardContent className="flex-grow">
-              {/* You can add more content here if needed */}
-            </CardContent>
+            <CardContent className="flex-grow" />
             <CardFooter>
               <Link href={`/preview-question/${question.id}`} passHref>
                 <Button className="w-full">Preview</Button>
@@ -177,7 +178,7 @@ export default function UniversitySection({ examType, onSelectQuestion, onBack }
               <h2 className="text-2xl font-bold mb-4">
                 {universities.find(u => u.id === selectedInstitution)?.name} Questions
               </h2>
-              {renderQuestions(universityQuestions[selectedInstitution] || [])}
+              {renderQuestions(universityQuestions[selectedInstitution as keyof typeof universityQuestions] || [])}
             </>
           )}
         </TabsContent>
@@ -190,7 +191,7 @@ export default function UniversitySection({ examType, onSelectQuestion, onBack }
               <h2 className="text-2xl font-bold mb-4">
                 {concours.find(c => c.id === selectedInstitution)?.name} Questions
               </h2>
-              {renderQuestions(concoursQuestions[selectedInstitution] || [])}
+              {renderQuestions(concoursQuestions[selectedInstitution as keyof typeof concoursQuestions] || [])}
             </>
           )}
         </TabsContent>

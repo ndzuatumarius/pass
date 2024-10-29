@@ -1,22 +1,54 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import Slider from 'react-slick'
+import dynamic from 'next/dynamic'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bell, Settings, Search, LogOut, Globe, Home, ShoppingCart, Info, Facebook, Twitter, Instagram, Linkedin, ChevronLeft } from 'lucide-react'
+import { Bell, Settings, Search, Globe, Home, ShoppingCart, Info, Facebook, Twitter, Instagram, Linkedin, ChevronLeft } from 'lucide-react'
 import SubjectList from './SubjectList'
 import SpecialtyList from './SpecialtyList'
 import UniversitySection from './UniversitySection'
 import FrancophoneSection from './FrancophoneSection'
 
+// Dynamically import Slider with no SSR
+const Slider = dynamic(() => import('react-slick'), { ssr: false })
+
 // Make sure to include the CSS for react-slick in your project
 import "slick-carousel/slick/slick.css"
 import "slick-carousel/slick/slick-theme.css"
 
-const sections = [
+// Define a more specific type for the subjects, specialties, and classes
+type ItemType = { code: string; name: string };
+
+interface SectionItem {
+  name: { en: string; fr: string };
+  link: string;
+  subjects?: ItemType[];
+  specialties?: ItemType[];
+  classes?: ItemType[];
+}
+
+interface Section {
+  id: string;
+  title: { en: string; fr: string };
+  color: string;
+  items: SectionItem[];
+}
+
+interface Question {
+  id: number;
+  title: string;
+  section: string;
+  level: string;
+  pdfUrl: string;
+  solutionUrl: string;
+  supplementaryMaterialUrl: string;
+  price: number;
+}
+
+const sections: Section[] = [
   {
     id: 'anglophone-general',
     title: { en: 'Anglophone General Section', fr: 'Section Générale Anglophone' },
@@ -138,13 +170,29 @@ const carouselImages = [
   '/placeholder.svg?height=400&width=800',
 ]
 
+// Add type for onSelectQuestion
+interface QuestionType {
+  id: number;
+  title: string;
+  level: string;
+  pdfUrl: string;
+  solutionUrl: string;
+  supplementaryMaterialUrl: string;
+  price: number;
+}
+
 export default function QuestionSalesPortal() {
   const [language, setLanguage] = useState<'en' | 'fr'>('en')
   const [currentSlide, setCurrentSlide] = useState(0)
   const [user, setUser] = useState<{ role: string } | null>(null)
   const [selectedSection, setSelectedSection] = useState<string | null>(null)
   const [selectedExam, setSelectedExam] = useState<string | null>(null)
-  const [selectedSubject, setSelectedSubject] = useState<{ code: string, name: string } | null>(null)
+  const [selectedSubject, setSelectedSubject] = useState<{ code: string; name: string } | null>(null)
+  const [selectedSpecialty, setSelectedSpecialty] = useState<{ code: string; name: string } | null>(null)
+  const [selectedClass, setSelectedClass] = useState<{ code: string; name: string } | null>(null)
+  const [questions, setQuestions] = useState<Question[]>([])
+  const [isMounted, setIsMounted] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'fr' : 'en')
@@ -161,12 +209,87 @@ export default function QuestionSalesPortal() {
     beforeChange: (current: number, next: number) => setCurrentSlide(next),
   }
 
-  const handleSelectQuestion = (question: any) => {
-    console.log("Selected question:", question);
-    // Implement question selection logic here
+  const handleSelectQuestion = (question: {
+    id: number;
+    title: string;
+    level: string;
+    pdfUrl?: string;
+    solutionUrl?: string;
+    supplementaryMaterialUrl?: string;
+    price?: number;
+  }) => {
+    // Handle the question with optional properties
+    const fullQuestion: QuestionType = {
+      id: question.id,
+      title: question.title,
+      level: question.level,
+      pdfUrl: question.pdfUrl || '',
+      solutionUrl: question.solutionUrl || '',
+      supplementaryMaterialUrl: question.supplementaryMaterialUrl || '',
+      price: question.price || 0
+    };
+    console.log("Selected question:", fullQuestion);
+  };
+
+  useEffect(() => {
+    // Simulating user login
+    setUser({ role: 'user' });
+  }, []);
+
+  useEffect(() => {
+    if (selectedSubject) {
+      // Fetch questions for the selected subject
+      const fetchQuestions = async () => {
+        try {
+          const response = await fetch(`/api/questions?subjectCode=${selectedSubject.code}`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch questions');
+          }
+          const fetchedQuestions = await response.json();
+          console.log('Fetched questions:', fetchedQuestions);
+          // Update state with fetched questions
+          setQuestions(fetchedQuestions);
+        } catch (error) {
+          console.error('Error fetching questions:', error);
+          // Handle error (e.g., show error message to user)
+        }
+      };
+
+      fetchQuestions();
+    }
+  }, [selectedSubject]);
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
+    setIsLoading(false)
+  }, [])
+
+  // Add error boundaries
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      console.error('Error caught by error boundary:', event.error);
+    };
+    window.addEventListener('error', handleError);
+    return () => {
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
+
+  // Add loading state check
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
   const renderContent = () => {
+    if (!sections) return null;
+
     if (selectedExam) {
       if (selectedExam === 'GCE OL General' || selectedExam === 'GCE AL General') {
         const examSubjects = sections.find(s => s.id === 'anglophone-general')?.items.find(item => item.name.en === selectedExam)?.subjects || []
@@ -193,14 +316,14 @@ export default function QuestionSalesPortal() {
         return (
           <SpecialtyList 
             specialties={examSpecialties}
-            onSelectSpecialty={(specialty) => setSelectedSubject(specialty)}
+            onSelectSpecialty={(specialty) => setSelectedSpecialty(specialty)}
             onBack={() => setSelectedExam(null)}
           />
         )
       } else if (selectedExam === 'Universities' || selectedExam === 'Entrance Exams') {
         return (
           <UniversitySection 
-            examType={selectedExam}
+            examType={selectedExam as 'Universities' | 'Entrance Exams'}
             onSelectQuestion={handleSelectQuestion}
             onBack={() => setSelectedExam(null)}
           />
@@ -211,12 +334,14 @@ export default function QuestionSalesPortal() {
           <FrancophoneSection 
             examType={selectedExam}
             classes={examClasses}
-            onSelectQuestion={handleSelectQuestion}
             onBack={() => setSelectedExam(null)}
           />
         )
       }
-    } else if (selectedSection === 'anglophone-general') {
+    } else if (selectedSection) {
+      const sectionData = sections.find(s => s.id === selectedSection)
+      if (!sectionData) return null
+
       return (
         <div>
           <Button 
@@ -228,117 +353,18 @@ export default function QuestionSalesPortal() {
             {language === 'en' ? 'Back to Sections' : 'Retour aux Sections'}
           </Button>
           <div className="grid md:grid-cols-2 gap-8">
-            {sections.find(s => s.id === 'anglophone-general')?.items.map((item, index) => (
-              <Card key={index} className={`${sections.find(s => s.id === 'anglophone-general')?.color} text-white hover:shadow-lg transition-shadow`}>
+            {sectionData.items.map((item, index) => (
+              <Card key={index} className={`${sectionData.color} text-white hover:shadow-lg transition-shadow`}>
                 <CardHeader>
                   <CardTitle className="text-2xl">{item.name[language]}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul>
-                    {item.subjects.slice(0, 5).map((subject, idx) => (
+                    {(item.subjects || item.specialties || item.classes || []).slice(0, 5).map((subject, idx) => (
                       <li key={idx} className="mb-1">{subject.name}</li>
                     ))}
-                    {item.subjects.length > 5 && <li>...</li>}
+                    {(item.subjects || item.specialties || item.classes || []).length > 5 && <li>...</li>}
                   </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="secondary" className="w-full" onClick={() => setSelectedExam(item.name.en)}>
-                    {language === 'en' ? 'View Subjects' : 'Voir les Matières'}
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )
-    } else if (selectedSection === 'francophone') {
-      return (
-        <div>
-          <Button 
-            variant="outline" 
-            onClick={() => setSelectedSection(null)} 
-            className="mb-4"
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            {language === 'en' ? 'Back to Sections' : 'Retour aux Sections'}
-          </Button>
-          <div className="grid md:grid-cols-3 gap-8">
-            {sections.find(s => s.id === 'francophone')?.items.map((item, index) => (
-              <Card key={index} className={`${sections.find(s => s.id === 'francophone')?.color} text-white hover:shadow-lg transition-shadow`}>
-                <CardHeader>
-                  <CardTitle className="text-2xl">{item.name[language]}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul>
-                    {item.classes.map((classItem, idx) => (
-                      <li key={idx} className="mb-1">{classItem.name}</li>
-                    ))}
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="secondary" className="w-full" onClick={() => setSelectedExam(item.name.en)}>
-                    {language === 'en' ? 'View Classes' : 'Voir les Classes'}
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )
-    } else if (selectedSection === 'anglophone-technical') {
-      return (
-        <div>
-          <Button 
-            variant="outline" 
-            onClick={() => setSelectedSection(null)} 
-            className="mb-4"
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            {language === 'en' ? 'Back to Sections' : 'Retour aux Sections'}
-          </Button>
-          <div className="grid md:grid-cols-2 gap-8">
-            {sections.find(s => s.id === 'anglophone-technical')?.items.map((item, index) => (
-              <Card key={index} className={`${sections.find(s => s.id === 'anglophone-technical')?.color} text-white hover:shadow-lg transition-shadow`}>
-                <CardHeader>
-                  <CardTitle className="text-2xl">{item.name[language]}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul>
-                    {(item.subjects || item.specialties)?.slice(0, 5).map((subject, idx) => (
-                      <li key={idx} className="mb-1">{subject.name}</li>
-                    ))}
-                    {(item.subjects || item.specialties)?.length > 5 && <li>...</li>}
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="secondary" className="w-full" onClick={() => setSelectedExam(item.name.en)}>
-                    {language === 'en' ? 'View Subjects' : 'Voir les Matières'}
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )
-    } else if (selectedSection === 'university') {
-      return (
-        <div>
-          <Button 
-            variant="outline" 
-            onClick={() => setSelectedSection(null)} 
-            className="mb-4"
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            {language === 'en' ? 'Back to Sections' : 'Retour aux Sections'}
-          </Button>
-          <div className="grid md:grid-cols-2 gap-8">
-            {sections.find(s => s.id === 'university')?.items.map((item, index) => (
-              <Card key={index} className={`${sections.find(s => s.id === 'university')?.color} text-white hover:shadow-lg transition-shadow`}>
-                <CardHeader>
-                  <CardTitle className="text-2xl">{item.name[language]}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {/* Add content if needed */}
                 </CardContent>
                 <CardFooter>
                   <Button variant="secondary" className="w-full" onClick={() => setSelectedExam(item.name.en)}>
@@ -392,16 +418,16 @@ export default function QuestionSalesPortal() {
             <div className="flex items-center space-x-4">
               <span className="font-bold text-2xl">PASS</span>
               <div className="hidden md:flex space-x-4">
-                <Link href="/" className="hover:text-gray-200 transition-colors">
-                  <Home className="inline-block mr-1" size={18} />
+                <Link href="/" className="hover:text-gray-200 transition-colors flex items-center">
+                  <Home className="mr-1" size={18} />
                   {language === 'en' ? 'Home' : 'Accueil'}
                 </Link>
-                <Link href="/products" className="hover:text-gray-200 transition-colors">
-                  <ShoppingCart className="inline-block mr-1" size={18} />
+                <Link href="/products" className="hover:text-gray-200 transition-colors flex items-center">
+                  <ShoppingCart className="mr-1" size={18} />
                   {language === 'en' ? 'Products' : 'Produits'}
                 </Link>
-                <Link href="/about" className="hover:text-gray-200 transition-colors">
-                  <Info className="inline-block mr-1" size={18} />
+                <Link href="/about" className="hover:text-gray-200 transition-colors flex items-center">
+                  <Info className="mr-1" size={18} />
                   {language === 'en' ? 'About Us' : 'À Propos'}
                 </Link>
               </div>
@@ -411,7 +437,7 @@ export default function QuestionSalesPortal() {
                 variant="ghost" 
                 size="sm" 
                 onClick={toggleLanguage} 
-                className="text-white hover:text-gray-200 hover:bg-white/20 focus:bg-white/20 active:bg-white/20"
+                className="text-white hover:text-gray-200 hover:bg-white/20"
               >
                 <Globe className="mr-1 h-4 w-4" />
                 {language === 'en' ? 'FR' : 'EN'}
@@ -437,33 +463,33 @@ export default function QuestionSalesPortal() {
 
       {/* Carousel Banner */}
       <div className="relative h-[300px] md:h-[400px] overflow-hidden">
-        <Slider {...settings}>
-          {carouselImages.map((image, index) => (
-            <div key={index} className="relative h-[300px] md:h-[400px]">
-              <Image
-                src={image}
-                alt={`Carousel Image ${index + 1}`}
-                layout="fill"
-                objectFit="cover"
-                className={`
-                  transition-all duration-1000 ease-in-out
-                  ${currentSlide === index ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-90 rotate-6'}
-                `}
-              />
-            </div>
-          ))}
-        </Slider>
+        {isMounted && (
+          <Slider {...settings}>
+            {carouselImages.map((image, index) => (
+              <div key={index} className="relative h-[300px] md:h-[400px]">
+                <Image
+                  src={image}
+                  alt={`Carousel Image ${index + 1}`}
+                  layout="fill"
+                  objectFit="cover"
+                  className="transition-all duration-1000 ease-in-out"
+                  priority={index === 0}
+                />
+              </div>
+            ))}
+          </Slider>
+        )}
       </div>
 
       {/* Main content */}
-      <div className="flex-grow container mx-auto px-4 py-8">
+      <main className="flex-grow container mx-auto px-4 py-8">
         <header className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-gray-800">{language === 'en' ? 'Our Examinations' : 'Nos Examens'}</h1>
           <p className="text-gray-600 mt-2">{language === 'en' ? 'Choose your section and start learning' : 'Choisissez votre section et commencez à apprendre'}</p>
         </header>
 
         {renderContent()}
-      </div>
+      </main>
 
       {/* Footer */}
       <footer className="bg-gray-800 text-white py-12">
@@ -501,16 +527,6 @@ export default function QuestionSalesPortal() {
           </div>
         </div>
       </footer>
-
-      <style jsx global>{`
-        @keyframes fadeInOut {
-          0%, 100% { opacity: 0; transform: scale(0.9) rotate(6deg); }
-          20%, 80% { opacity: 1; transform: scale(1) rotate(0); }
-        }
-        .slick-slide img {
-          animation: fadeInOut 5s infinite;
-        }
-      `}</style>
     </div>
   )
 }

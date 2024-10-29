@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Lock, Unlock, FileText } from 'lucide-react'
@@ -58,6 +58,11 @@ export default function ViewQuestion({
       onClose: () => {},
     })
   }
+
+  useEffect(() => {
+    console.log(`Viewing question with ID: ${questionId}`);
+    // You could use this to fetch additional data or track views
+  }, [questionId]);
 
   return (
     <Card className="w-full max-w-4xl mx-auto">

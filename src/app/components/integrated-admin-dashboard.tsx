@@ -18,8 +18,23 @@ const users = [
   { username: 'user', password: 'password', role: 'user' },
 ]
 
+// Add interface above component
+interface User {
+  username: string;
+  password: string;
+  role: string;
+}
+
+// Add this interface with the other interfaces
+interface Course {
+  id?: number;
+  title: string;
+  category: string;
+  price: number;
+}
+
 export default function IntegratedAdminDashboard() {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<User | null>(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -41,7 +56,7 @@ export default function IntegratedAdminDashboard() {
   const [theme, setTheme] = useState("light")
   const [language, setLanguage] = useState("en")
   const [currency, setCurrency] = useState("XAF")
-  const [selectedPdf, setSelectedPdf] = useState(null)
+  const [selectedPdf, setSelectedPdf] = useState<string | null>(null)
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
@@ -50,7 +65,7 @@ export default function IntegratedAdminDashboard() {
     }
   }, [])
 
-  const handleLogin = (e) => {
+  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const foundUser = users.find(u => u.username === username && u.password === password)
     if (foundUser) {
@@ -61,7 +76,7 @@ export default function IntegratedAdminDashboard() {
     }
   }
 
-  const handleRegister = (e) => {
+  const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (users.some(u => u.username === username)) {
       setError('Username already exists')
@@ -78,28 +93,27 @@ export default function IntegratedAdminDashboard() {
     localStorage.removeItem('user')
   }
 
-  const handleAddCourse = (newCourse) => {
+  const handleAddCourse = (newCourse: Omit<Course, 'id'>) => {
     setCourses([...courses, { id: Date.now(), ...newCourse }])
   }
 
-  const handleEditCourse = (id, updatedCourse) => {
+  const handleEditCourse = (id: number, updatedCourse: Partial<Course>) => {
     setCourses(courses.map(course => course.id === id ? { ...course, ...updatedCourse } : course))
   }
 
-  const handleDeleteCourse = (id) => {
+  const handleDeleteCourse = (id: number) => {
     setCourses(courses.filter(course => course.id !== id))
   }
 
-  const handleAddQuestion = (newQuestion) => {
+  const handleAddQuestion = (newQuestion: any) => {
     setQuestions([...questions, { id: Date.now(), ...newQuestion }])
   }
 
-  
-  const handleEditQuestion = (id, updatedQuestion) => {
+  const handleEditQuestion = (id: number, updatedQuestion: any) => {
     setQuestions(questions.map(question => question.id === id ? { ...question, ...updatedQuestion } : question))
   }
 
-  const handleDeleteQuestion = (id) => {
+  const handleDeleteQuestion = (id: number) => {
     setQuestions(questions.filter(question => question.id !== id))
   }
 
@@ -301,9 +315,9 @@ export default function IntegratedAdminDashboard() {
                                 <SelectValue placeholder="Select category" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="university">University Concour</SelectItem>
-                                <SelectItem value="advanced">Advanced Level</SelectItem>
-                                <SelectItem value="ordinary">Ordinary Level</SelectItem>
+                                <SelectItem value="University Concour">University Concour</SelectItem>
+                                <SelectItem value="Advanced Level">Advanced Level</SelectItem>
+                                <SelectItem value="Ordinary Level">Ordinary Level</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -365,9 +379,9 @@ export default function IntegratedAdminDashboard() {
                                           <SelectValue placeholder="Select category" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          <SelectItem value="university">University Concour</SelectItem>
-                                          <SelectItem value="advanced">Advanced Level</SelectItem>
-                                          <SelectItem value="ordinary">Ordinary Level</SelectItem>
+                                          <SelectItem value="University Concour">University Concour</SelectItem>
+                                          <SelectItem value="Advanced Level">Advanced Level</SelectItem>
+                                          <SelectItem value="Ordinary Level">Ordinary Level</SelectItem>
                                         </SelectContent>
                                       </Select>
                                     </div>
@@ -641,8 +655,6 @@ export default function IntegratedAdminDashboard() {
 
 export function AdminDashboardWrapper() {
   return (
-   
-      <IntegratedAdminDashboard />
-    
+    <IntegratedAdminDashboard />
   )
 }

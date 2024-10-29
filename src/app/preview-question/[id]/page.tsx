@@ -18,7 +18,7 @@ export default function PreviewQuestionPage() {
   const questionId = params.id as string
 
   // In a real application, you'd fetch the question data based on the ID
-  const questionData = mockQuestions[questionId] || { title: `Sample Question ${questionId}`, level: 'Unknown' }
+  const questionData = mockQuestions[questionId as keyof typeof mockQuestions] || { title: `Sample Question ${questionId}`, level: 'Unknown' }
 
   const viewQuestionProps = {
     questionId,

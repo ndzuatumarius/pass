@@ -7,12 +7,12 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Bell, Settings, Search, LogOut, Menu, X } from 'lucide-react'
-import ViewQuestion from './ViewQuestion'
 import QuestionList from './QuestionList'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from "framer-motion"
 import UniversitySection from './UniversitySection'
+import ViewQuestion from './ViewQuestion'
 
 const sections = [
   {
@@ -60,7 +60,26 @@ const courses = [
 
 interface DashboardProps {
   initialSection?: string;
-  user?: { role: string } | null; // Add this line
+  user?: { role: string } | null;
+}
+
+interface Question {
+  id: number;
+  title: string;
+  section: string;
+  level: string;
+  pdfUrl: string;
+  solutionUrl: string;
+  supplementaryMaterialUrl: string;
+  price: number;
+}
+
+interface Course {
+  id: number;
+  title: string;
+  section: string;
+  level: string;
+  thumbnail: string;
 }
 
 export default function Dashboard({ initialSection = "all", user = null }: DashboardProps) {
@@ -79,6 +98,7 @@ export default function Dashboard({ initialSection = "all", user = null }: Dashb
   const sidebarRef = useRef<HTMLDivElement>(null)
   const toggleButtonRef = useRef<HTMLButtonElement>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedSubject, setSelectedSubject] = useState<{ code: string; name: string } | null>(null)
 
   useEffect(() => {
     const sectionFromUrl = searchParams.get('section')
@@ -105,7 +125,6 @@ export default function Dashboard({ initialSection = "all", user = null }: Dashb
   }, [isSidebarOpen])
 
   useEffect(() => {
-    // Simulate loading
     const timer = setTimeout(() => {
       setIsLoading(false)
     }, 1500)
@@ -113,10 +132,21 @@ export default function Dashboard({ initialSection = "all", user = null }: Dashb
     return () => clearTimeout(timer)
   }, [])
 
-  const filteredCourses = courses.filter(course => 
-    (selectedSection === "all" || course.section === selectedSection) &&
-    course.title.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  useEffect(() => {
+    const userLanguage = navigator.language.startsWith('fr') ? 'fr' : 'en'
+    setLanguage(userLanguage)
+  }, [])
+
+  const filteredCourses: Question[] = courses.map(course => ({
+    id: course.id,
+    title: course.title,
+    section: course.section,
+    level: course.level,
+    pdfUrl: `/sample-pdf-${course.id}.pdf`,
+    solutionUrl: `/sample-solution-${course.id}.pdf`,
+    supplementaryMaterialUrl: `/sample-material-${course.id}.pdf`,
+    price: 9.99
+  }));
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
 
@@ -147,7 +177,6 @@ export default function Dashboard({ initialSection = "all", user = null }: Dashb
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Mobile Sidebar Toggle Button */}
       <button
         ref={toggleButtonRef}
         className="lg:hidden fixed top-4 left-4 z-20 p-2 bg-green-700 text-white rounded-md"
@@ -156,45 +185,39 @@ export default function Dashboard({ initialSection = "all", user = null }: Dashb
         {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Sidebar */}
       <aside
         ref={sidebarRef}
-        className={`
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-10
-          w-64 bg-green-700 text-white transition-transform duration-300 ease-in-out
-        `}
+        className={`fixed inset-y-0 left-0 z-10 w-64 bg-green-700 text-white transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="p-4">
           <h1 className="text-2xl font-bold mb-8">PASS</h1>
           <nav className="space-y-2">
-            <a href="#" className="block py-2 px-4 bg-green-600 rounded flex items-center">
+            <a href="#" className="inline-flex items-center py-2 px-4 bg-green-600 rounded w-full">
               <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
               Dashboard
             </a>
-            <a href="#" className="block py-2 px-4 hover:bg-green-600 rounded flex items-center">
+            <a href="#" className="inline-flex items-center py-2 px-4 hover:bg-green-600 rounded w-full">
               <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
               My Courses
             </a>
-            <a href="#" className="block py-2 px-4 hover:bg-green-600 rounded flex items-center">
+            <a href="#" className="inline-flex items-center py-2 px-4 hover:bg-green-600 rounded w-full">
               <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
               Payments
             </a>
-            <a href="#" className="block py-2 px-4 hover:bg-green-600 rounded flex items-center">
+            <a href="#" className="inline-flex items-center py-2 px-4 hover:bg-green-600 rounded w-full">
               <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
               Favourites
             </a>
-            <a href="#" className="block py-2 px-4 hover:bg-green-600 rounded flex items-center" onClick={() => handleSectionSelect('university')}>
+            <a href="#" className="inline-flex items-center py-2 px-4 hover:bg-green-600 rounded w-full" onClick={() => handleSectionSelect('university')}>
               <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
               University & Concours
             </a>
-            <a href="#" className="block py-2 px-4 hover:bg-green-600 rounded flex items-center">
+            <a href="#" className="inline-flex items-center py-2 px-4 hover:bg-green-600 rounded w-full">
               <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
               Settings
             </a>
-            {/* Add this new link for admin users */}
             {user && user.role === 'admin' && (
-              <Link href="/admin" className="block py-2 px-4 hover:bg-green-600 rounded flex items-center">
+              <Link href="/admin" className="inline-flex items-center py-2 px-4 hover:bg-green-600 rounded w-full">
                 <Settings className="mr-2 h-4 w-4" />
                 Admin Dashboard
               </Link>
@@ -203,17 +226,6 @@ export default function Dashboard({ initialSection = "all", user = null }: Dashb
         </div>
         <div className="p-4">
           <h3 className="text-lg font-semibold mb-4">My Courses</h3>
-          {/* {myCourses.map((course, index) => (
-            <div key={index} className="mb-4">
-              <div className="flex justify-between text-sm mb-1">
-                <span>{course.name}</span>
-                <span>{course.progress}%</span>
-              </div>
-              <div className="w-full bg-green-900 rounded-full h-2.5">
-                <div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${course.progress}%` }}></div>
-              </div>
-            </div>
-          ))} */}
         </div>
         <div className="p-4 mt-auto">
           <button className="flex items-center w-full bg-green-800 hover:bg-green-900 text-white py-2 px-4 rounded">
@@ -223,12 +235,11 @@ export default function Dashboard({ initialSection = "all", user = null }: Dashb
         </div>
       </aside>
 
-      {/* Main content */}
       <main className="flex-1 p-4 lg:p-8 overflow-auto">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold">Welcome Back, NDZUATU!</h1>
-            <p className="text-gray-600">It's been a while, we've missed you</p>
+            <p className="text-gray-600">It&apos;s been a while, we&apos;ve missed you</p>
           </div>
           <div className="flex items-center space-x-4 mt-4 lg:mt-0">
             <Button variant="outline" size="icon">
@@ -316,15 +327,14 @@ export default function Dashboard({ initialSection = "all", user = null }: Dashb
             {view === 'sections' && (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {filteredCourses.map((course) => (
+                  {courses.map((course) => (
                     <Card key={course.id} className="bg-white overflow-hidden">
                       <div className="relative h-48 w-full">
                         <Image
                           src={course.thumbnail}
                           alt={course.title}
-                          layout="fill"
-                          objectFit="cover"
-                          className="transition-transform duration-300 hover:scale-105"
+                          fill
+                          className="object-cover transition-transform duration-300 hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-50" />
                         <div className="absolute bottom-2 left-2 right-2 text-white">
@@ -342,11 +352,16 @@ export default function Dashboard({ initialSection = "all", user = null }: Dashb
             )}
 
             {view === 'questions' && selectedSection === 'university' && (
-              <UniversitySection onSelectQuestion={handleQuestionSelect} />
+              <UniversitySection 
+                examType="Universities"
+                onSelectQuestion={handleQuestionSelect}
+                onBack={handleBackToSections}
+              />
             )}
 
-            {view === 'questions' && selectedSection !== 'university' && (
+            {view === 'questions' && selectedSection !== 'university' && selectedSubject && (
               <QuestionList 
+                subject={selectedSubject}
                 questions={filteredCourses}
                 onSelectQuestion={handleQuestionSelect}
                 onBack={handleBackToSections}

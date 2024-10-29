@@ -1,7 +1,6 @@
-import Image from 'next/image'; // Adjust based on your image handling
-import { SetStateAction, useEffect, useState } from 'react'
-import { Search, Bell, Settings, Grid, BookOpen, CreditCard, Heart, LogOut, Lock, Play } from 'lucide-react'
-import Script from 'next/script'
+import Image from 'next/image';
+import { useEffect, useState } from 'react'
+import { Search, Bell, Settings, Play, Lock } from 'lucide-react'
 
 interface Course {
     id: number;
@@ -19,6 +18,7 @@ interface MainContentProps {
     courses: Course[];
     myCourses: MyCourse[];
 }
+
 type Shape = {
     type: 'square' | 'circle' | 'triangle'
     x: number
@@ -26,22 +26,20 @@ type Shape = {
     size: number
     color: string
     rotation: number
-  }
+}
 
-  
 export default function MainContent({ categories, courses, myCourses }: MainContentProps) {
     const [activeCategory, setActiveCategory] = useState('All');
     const [previewOpen, setPreviewOpen] = useState(false)
-    const [selectedCourse, setSelectedCourse] = useState(null)
+    const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
     const [shapes, setShapes] = useState<Shape[]>([])
 
-
-    const openPreview = (course: SetStateAction<null>) => {
+    const openPreview = (course: Course) => {
         setSelectedCourse(course)
         setPreviewOpen(true)
-      }
+    }
 
-      useEffect(() => {
+    useEffect(() => {
         const colors = ['#4CAF50', '#FFC107', '#2196F3', '#E91E63', '#9C27B0']
         const shapeTypes: Shape['type'][] = ['square', 'circle', 'triangle']
     
@@ -71,36 +69,32 @@ export default function MainContent({ categories, courses, myCourses }: MainCont
         const interval = setInterval(animateShapes, 50)
     
         return () => clearInterval(interval)
-      }, [])
+    }, [])
 
-
-      
     return (
         <main className="flex-1 p-8 relative">
             <div className="flex justify-between items-center mb-8">
-
-                 {/* Animated Background Shapes */}
-      {shapes.map((shape, index) => (
-        <div
-          key={index}
-          className="fixed transition-all duration-200 ease-linear opacity-30"
-          style={{
-            left: `${shape.x}px`,
-            top: `${shape.y}px`,
-            width: `${shape.size}px`,
-            height: `${shape.size}px`,
-            backgroundColor: shape.color,
-            borderRadius: shape.type === 'circle' ? '50%' : shape.type === 'square' ? '0%' : '0%',
-            clipPath: shape.type === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : 'none',
-            transform: `rotate(${shape.rotation}deg)`,
-          }}
-        ></div>
-      ))}
-
+                {/* Animated Background Shapes */}
+                {shapes.map((shape, index) => (
+                    <div
+                        key={index}
+                        className="fixed transition-all duration-200 ease-linear opacity-30"
+                        style={{
+                            left: `${shape.x}px`,
+                            top: `${shape.y}px`,
+                            width: `${shape.size}px`,
+                            height: `${shape.size}px`,
+                            backgroundColor: shape.color,
+                            borderRadius: shape.type === 'circle' ? '50%' : shape.type === 'square' ? '0%' : '0%',
+                            clipPath: shape.type === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : 'none',
+                            transform: `rotate(${shape.rotation}deg)`,
+                        }}
+                    ></div>
+                ))}
 
                 <div>
                     <h1 className="text-2xl font-bold text-green-800">Welcome Back, NDZUATU!</h1>
-                    <p className="text-gray-600">It's been a while, we've missed you</p>
+                    <p className="text-gray-600">It&apos;s been a while, we&apos;ve missed you</p>
                 </div>
                 <div className="flex items-center space-x-4">
                     <button className="p-2 rounded-full bg-gray-200 hover:bg-gray-300">
@@ -179,45 +173,45 @@ export default function MainContent({ categories, courses, myCourses }: MainCont
                     ))}
             </div>
             
-          {/* Preview Modal */}
-          {previewOpen && selectedCourse && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold mb-4">{selectedCourse.title}</h2>
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold mb-2">Introductory Video</h3>
-                    <div className="bg-gray-200 h-48 flex items-center justify-center">
-                      <Play className="h-12 w-12 text-gray-400" />
+            {/* Preview Modal */}
+            {previewOpen && selectedCourse && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="p-6">
+                            <h2 className="text-2xl font-bold mb-4">{selectedCourse.title}</h2>
+                            <div className="mb-6">
+                                <h3 className="text-lg font-semibold mb-2">Introductory Video</h3>
+                                <div className="bg-gray-200 h-48 flex items-center justify-center">
+                                    <Play className="h-12 w-12 text-gray-400" />
+                                </div>
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-semibold mb-2">Locked Content</h3>
+                                <ul className="space-y-2">
+                                    {['Full exam paper', 'Detailed solutions', 'Video explanations', 'Practice questions'].map((item, index) => (
+                                        <li key={index} className="flex items-center text-gray-600">
+                                            <Lock className="h-4 w-4 mr-2" />
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <p className="mt-4 text-gray-600">
+                                This is a detailed description of the paper. It includes information about the content, difficulty level, and any
+                                special instructions or requirements.
+                            </p>
+                            <div className="mt-6 flex justify-end">
+                                <button
+                                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                                    onClick={() => setPreviewOpen(false)}
+                                >
+                                    Close Preview
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Locked Content</h3>
-                    <ul className="space-y-2">
-                      {['Full exam paper', 'Detailed solutions', 'Video explanations', 'Practice questions'].map((item, index) => (
-                        <li key={index} className="flex items-center text-gray-600">
-                          <Lock className="h-4 w-4 mr-2" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <p className="mt-4 text-gray-600">
-                    This is a detailed description of the paper. It includes information about the content, difficulty level, and any
-                    special instructions or requirements.
-                  </p>
-                  <div className="mt-6 flex justify-end">
-                    <button
-                      className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                      onClick={() => setPreviewOpen(false)}
-                    >
-                      Close Preview
-                    </button>
-                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+            )}
         </main>
     );
 }

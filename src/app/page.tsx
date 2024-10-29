@@ -1,7 +1,7 @@
 'use client'
 
 import Image from "next/image";
-import Dashboard from "@/app/components/dashboard1";
+
 
 import { useState, useEffect } from 'react'
 import QuestionSalesPortal from "@/app/components/page"

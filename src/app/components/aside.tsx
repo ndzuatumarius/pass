@@ -3,7 +3,9 @@ import { Search, Bell, Settings, Grid, BookOpen, CreditCard, Heart, LogOut, Lock
 import Image from 'next/image'
 
 interface Course {
+    id: number;
     name: string;
+    progress: number;
 }
 
 interface AsideProps {

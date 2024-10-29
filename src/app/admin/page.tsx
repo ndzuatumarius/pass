@@ -1,47 +1,73 @@
 'use client'
 
-import { useState } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Grid, BookOpen, CreditCard, Upload, Plus, Edit, Trash2, Search, Bell, Settings, LogOut, Eye, FileUp, X } from 'lucide-react'
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Grid, BookOpen, CreditCard, Upload, Plus, Edit, Trash2, Search, Bell, Settings, LogOut, Eye, FileUp, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+
+interface Course {
+  id: number;
+  title: string;
+  category: string;
+  price: number;
+}
+
+interface Question {
+  id: number;
+  title: string;
+  course: string;
+  difficulty: string;
+  pdfUrl: string;
+}
+
+interface Payment {
+  id: number;
+  amount: number;
+  course: string;
+  status: string;
+}
+
+type EditableItem = Course | Question | Payment;
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('courses')
-  const [courses, setCourses] = useState([
+  const [courses, setCourses] = useState<Course[]>([
     { id: 1, title: "Introduction to Networking", category: "IT", price: 25000 },
     { id: 2, title: "Advanced Mathematics", category: "Math", price: 30000 },
   ])
-  const [questions, setQuestions] = useState([
-    { id: 1, title: "Network Topology", course: "Introduction to Networking", difficulty: "Medium" },
-    { id: 2, title: "Calculus Basics", course: "Advanced Mathematics", difficulty: "Hard" },
+  const [questions, setQuestions] = useState<Question[]>([
+    { id: 1, title: "Network Topology", course: "Introduction to Networking", difficulty: "Medium", pdfUrl: "" },
+    { id: 2, title: "Calculus Basics", course: "Advanced Mathematics", difficulty: "Hard", pdfUrl: "" },
   ])
-  const [payments, setPayments] = useState([
+  const [payments, setPayments] = useState<Payment[]>([
     { id: 1, amount: 25000, course: "Introduction to Networking", status: "Completed" },
     { id: 2, amount: 30000, course: "Advanced Mathematics", status: "Pending" },
   ])
 
-  const [editItem, setEditItem] = useState(null)
+  const [editItem, setEditItem] = useState<EditableItem | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [pdfPreview, setPdfPreview] = useState<string | null>(null)
   const [paymentApiKey, setPaymentApiKey] = useState('')
 
-  const handleAdd = () => {
+  const handleAdd = (type: string) => {
     setEditItem(null)
     setIsDialogOpen(true)
+    console.log(`Adding new ${type}`);
+    // You can use the type parameter to determine what kind of item is being added
   }
 
-  const handleEdit = (type, item) => {
+  const handleEdit = (type: string, item: EditableItem) => {
     setEditItem(item)
     setIsDialogOpen(true)
   }
 
-  const handleDelete = (type, id) => {
+  const handleDelete = (type: string, id: number) => {
     switch (type) {
       case 'course':
         setCourses(courses.filter(course => course.id !== id))
@@ -55,29 +81,51 @@ export default function AdminPage() {
     }
   }
 
-  const handleSubmit = (type, data) => {
+  const handleSubmit = (type: string, data: { [key: string]: string | number }) => {
     switch (type) {
-      case 'course':
+      case 'course': {
+        const courseData: Course = {
+          id: editItem?.id || Date.now(),
+          title: data.title as string,
+          category: data.category as string,
+          price: Number(data.price),
+        }
         if (editItem) {
-          setCourses(courses.map(course => course.id === editItem.id ? { ...course, ...data } : course))
+          setCourses(courses.map(course => course.id === editItem.id ? courseData : course))
         } else {
-          setCourses([...courses, { id: Date.now(), ...data }])
+          setCourses([...courses, courseData])
         }
         break
-      case 'question':
+      }
+      case 'question': {
+        const questionData: Question = {
+          id: editItem?.id || Date.now(),
+          title: data.title as string,
+          course: data.course as string,
+          difficulty: data.difficulty as string,
+          pdfUrl: data.pdfUrl ? (data.pdfUrl as string) : '',
+        }
         if (editItem) {
-          setQuestions(questions.map(question => question.id === editItem.id ? { ...question, ...data } : question))
+          setQuestions(questions.map(question => question.id === editItem.id ? questionData : question))
         } else {
-          setQuestions([...questions, { id: Date.now(), ...data }])
+          setQuestions([...questions, questionData])
         }
         break
-      case 'payment':
+      }
+      case 'payment': {
+        const paymentData: Payment = {
+          id: editItem?.id || Date.now(),
+          amount: Number(data.amount),
+          course: data.course as string,
+          status: data.status as string,
+        }
         if (editItem) {
-          setPayments(payments.map(payment => payment.id === editItem.id ? { ...payment, ...data } : payment))
+          setPayments(payments.map(payment => payment.id === editItem.id ? paymentData : payment))
         } else {
-          setPayments([...payments, { id: Date.now(), ...data }])
+          setPayments([...payments, paymentData])
         }
         break
+      }
     }
     setIsDialogOpen(false)
     setEditItem(null)
@@ -235,11 +283,12 @@ export default function AdminPage() {
                         <TableCell>{question.course}</TableCell>
                         <TableCell>{question.difficulty}</TableCell>
                         <TableCell>
-                          {question.pdfUrl ? (
+                          {question.pdfUrl && (
                             <Button variant="outline" size="sm" onClick={() => handlePreviewPdf(question.pdfUrl)}>
                               <Eye className="h-4 w-4 mr-2" /> Preview
                             </Button>
-                          ) : (
+                          )}
+                          {!question.pdfUrl && (
                             <Button variant="outline" size="sm" onClick={() => handleUploadPdf(question.id)}>
                               <FileUp className="h-4 w-4 mr-2" /> Upload PDF
                             </Button>
@@ -339,56 +388,91 @@ export default function AdminPage() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editItem ? 'Edit' : 'Add'} Question</DialogTitle>
+            <DialogTitle>{editItem ? 'Edit' : 'Add'} {editItem ? (editItem as Course).category ? 'Course' : (editItem as Question).course ? 'Question' : 'Payment' : 'Item'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={(e) => {
             e.preventDefault();
             const formData = new FormData(e.target as HTMLFormElement);
-            handleSubmit('question', {
+            const type = editItem ? (editItem as Course).category ? 'course' : (editItem as Question).course ? 'question' : 'payment' : 'question';
+            handleSubmit(type, {
               title: formData.get('title') as string,
+              category: formData.get('category') as string,
+              price: formData.get('price') as string,
               course: formData.get('course') as string,
               difficulty: formData.get('difficulty') as string,
-              pdfUrl: formData.get('pdf') ? URL.createObjectURL(formData.get('pdf') as File) : editItem?.pdfUrl
+              pdfUrl: formData.get('pdf') ? URL.createObjectURL(formData.get('pdf') as File) : (editItem as Question)?.pdfUrl || '',
+              amount: formData.get('amount') as string,
+              status: formData.get('status') as string,
             });
           }}>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="title" className="text-right">Title</Label>
-                <Input id="title" name="title" defaultValue={editItem?.title || ''} className="col-span-3" />
+                <Input id="title" name="title" defaultValue={(editItem as Question)?.title || (editItem as Course)?.title || ''} className="col-span-3" />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="course" className="text-right">Course</Label>
-                <Select name="course" defaultValue={editItem?.course || ''}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select course" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {courses.map((course) => (
-                      <SelectItem key={course.id} value={course.title}>{course.title}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="difficulty" className="text-right">Difficulty</Label>
-                <Select name="difficulty" defaultValue={editItem?.difficulty || ''}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select difficulty" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Easy">Easy</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="Hard">Hard</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="pdf" className="text-right">PDF File</Label>
-                <Input id="pdf" name="pdf" type="file" accept="application/pdf" className="col-span-3" />
-              </div>
+              {editItem && (editItem as Course).category && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="category" className="text-right">Category</Label>
+                  <Input id="category" name="category" defaultValue={(editItem as Course)?.category || ''} className="col-span-3" />
+                </div>
+              )}
+              {editItem && (editItem as Course).category && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="price" className="text-right">Price</Label>
+                  <Input id="price" name="price" defaultValue={(editItem as Course)?.price || ''} className="col-span-3" />
+                </div>
+              )}
+              {editItem && (editItem as Question).course && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="course" className="text-right">Course</Label>
+                  <Select name="course" defaultValue={(editItem as Question)?.course || ''}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select course" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {courses.map((course) => (
+                        <SelectItem key={course.id} value={course.title}>{course.title}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {editItem && (editItem as Question).course && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="difficulty" className="text-right">Difficulty</Label>
+                  <Select name="difficulty" defaultValue={(editItem as Question)?.difficulty || ''}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select difficulty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Easy">Easy</SelectItem>
+                      <SelectItem value="Medium">Medium</SelectItem>
+                      <SelectItem value="Hard">Hard</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {editItem && (editItem as Question).course && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="pdf" className="text-right">PDF File</Label>
+                  <Input id="pdf" name="pdf" type="file" accept="application/pdf" className="col-span-3" />
+                </div>
+              )}
+              {editItem && (editItem as Payment).course && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="amount" className="text-right">Amount</Label>
+                  <Input id="amount" name="amount" defaultValue={(editItem as Payment)?.amount || ''} className="col-span-3" />
+                </div>
+              )}
+              {editItem && (editItem as Payment).course && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="status" className="text-right">Status</Label>
+                  <Input id="status" name="status" defaultValue={(editItem as Payment)?.status || ''} className="col-span-3" />
+                </div>
+              )}
             </div>
             <DialogFooter>
-              <Button type="submit">{editItem ? 'Update' : 'Add'} Question</Button>
+              <Button type="submit">{editItem ? 'Update' : 'Add'} {editItem ? (editItem as Course).category ? 'Course' : (editItem as Question).course ? 'Question' : 'Payment' : 'Item'}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

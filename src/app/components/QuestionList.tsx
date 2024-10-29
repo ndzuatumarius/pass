@@ -6,8 +6,14 @@ import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 
 interface Question {
-  id: string
+  id: number
   title: string
+  section: string
+  level: string
+  pdfUrl: string
+  solutionUrl: string
+  supplementaryMaterialUrl: string
+  price: number
 }
 
 interface QuestionListProps {

@@ -13,7 +13,12 @@ interface Class {
 interface Question {
   id: number
   title: string
+  section: string
   level: string
+  pdfUrl: string
+  solutionUrl: string
+  supplementaryMaterialUrl: string
+  price: number
 }
 
 interface FrancophoneSectionProps {
@@ -24,16 +29,70 @@ interface FrancophoneSectionProps {
 
 const mockQuestions: Record<string, Question[]> = {
   'BEPC-A': [
-    { id: 1, title: "French Language Question 1", level: "BEPC A" },
-    { id: 2, title: "Mathematics Question 1", level: "BEPC A" },
+    { 
+      id: 1, 
+      title: "French Language Question 1", 
+      section: "Section 1", 
+      level: "BEPC A", 
+      pdfUrl: "url-to-pdf", 
+      solutionUrl: "url-to-solution", 
+      supplementaryMaterialUrl: "url-to-material", 
+      price: 0 
+    },
+    { 
+      id: 2, 
+      title: "Mathematics Question 1", 
+      section: "Section 1", 
+      level: "BEPC A", 
+      pdfUrl: "url-to-pdf", 
+      solutionUrl: "url-to-solution", 
+      supplementaryMaterialUrl: "url-to-material", 
+      price: 0 
+    },
   ],
   'Probatoire-C': [
-    { id: 3, title: "Physics Question 1", level: "Probatoire C" },
-    { id: 4, title: "Chemistry Question 1", level: "Probatoire C" },
+    { 
+      id: 3, 
+      title: "Physics Question 1", 
+      section: "Section 1", 
+      level: "Probatoire C", 
+      pdfUrl: "url-to-pdf", 
+      solutionUrl: "url-to-solution", 
+      supplementaryMaterialUrl: "url-to-material", 
+      price: 0 
+    },
+    { 
+      id: 4, 
+      title: "Chemistry Question 1", 
+      section: "Section 1", 
+      level: "Probatoire C", 
+      pdfUrl: "url-to-pdf", 
+      solutionUrl: "url-to-solution", 
+      supplementaryMaterialUrl: "url-to-material", 
+      price: 0 
+    },
   ],
   'BACC-D': [
-    { id: 5, title: "Biology Question 1", level: "BACC D" },
-    { id: 6, title: "Earth Science Question 1", level: "BACC D" },
+    { 
+      id: 5, 
+      title: "Biology Question 1", 
+      section: "Section 1", 
+      level: "BACC D", 
+      pdfUrl: "url-to-pdf", 
+      solutionUrl: "url-to-solution", 
+      supplementaryMaterialUrl: "url-to-material", 
+      price: 0 
+    },
+    { 
+      id: 6, 
+      title: "Earth Science Question 1", 
+      section: "Section 1", 
+      level: "BACC D", 
+      pdfUrl: "url-to-pdf", 
+      solutionUrl: "url-to-solution", 
+      supplementaryMaterialUrl: "url-to-material", 
+      price: 0 
+    },
   ],
   // Add more mock questions for other classes
 }
